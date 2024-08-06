@@ -125,11 +125,7 @@ def main(page: ft.Page):
         ])
 
     def table_page():
-        df = pd.DataFrame({
-            "test": ['1', "20", "40"],
-            "test1": ['2', "21", "41"],
-            "test2": ['3', "22", "43"],
-        })
+        df = pd.read_excel('./planilhas/planilhaDevelopment.xlsx')
 
         def headers(df: pd.DataFrame) -> list:
             return [ft.DataColumn(ft.Text(header)) for header in df.columns]
@@ -137,19 +133,44 @@ def main(page: ft.Page):
         def rows(df: pd.DataFrame) -> list:
             rows = []
             for index, row in df.iterrows():
-                rows.append(ft.DataRow(cells=[ft.DataCell(ft.Text(row[header])) for header in df.columns]))
+                rows.append(ft.DataRow(cells=[ft.DataCell(ft.Text(str(row[header]))) for header in df.columns]))
             return rows
 
         datatable = ft.DataTable(
             columns=headers(df),
-            rows=rows(df)
+            rows=rows(df),
+            divider_thickness=5,
+            column_spacing=20
         )
 
-        return ft.Column([
-            ft.Text("Tabela de Dados", size=30, weight="bold"),
-            datatable,
-            ft.ElevatedButton(text="Voltar para Home", on_click=lambda e: page.controls.clear() or page.add(create_base_container(home_page(""))))
-        ])
+        horizontal_scroll = ft.Row(
+            controls=[
+                ft.Column(
+                    controls=[
+                        datatable
+                    ],
+                    scroll=ft.ScrollMode.ALWAYS
+                )
+            ],
+            scroll=ft.ScrollMode.ALWAYS
+        )
+
+        vertical_scroll = ft.Column(
+            controls=[
+                horizontal_scroll,
+                ft.ElevatedButton(
+                    text="Voltar para Home Page",
+                    on_click=lambda e: page.controls.clear() or page.add(create_base_container(home_page("")))
+                ),
+            ],
+            scroll=ft.ScrollMode.ALWAYS
+        )
+
+        return ft.Container(
+            content=vertical_scroll,
+            height=600,
+            width=500
+        )
 
     # Formulário de Login
     username_login = ft.TextField(label="Usuário", width=300)
