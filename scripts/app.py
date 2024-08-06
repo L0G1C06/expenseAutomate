@@ -113,8 +113,8 @@ def main(page: ft.Page):
                 print("Error during capture")
 
         return ft.Column([
-            ft.Text("Webcam Capture Your Face", size=30, weight="bold"),
-            ft.ElevatedButton("Take My Face", bgcolor="blue", color="white", on_click=take_picture),
+            ft.Text("Tire a foto da nota", size=30, weight="bold"),
+            ft.ElevatedButton("Tirar foto", bgcolor="blue", color="white", on_click=take_picture),
             myimage,
             ft.ElevatedButton(text="Voltar para Home", on_click=lambda e: page.controls.clear() or page.add(create_base_container(home_page(""))))
         ])
