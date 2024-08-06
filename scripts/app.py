@@ -62,8 +62,8 @@ def main(page: ft.Page):
             controls=[
                 ft.Text(f"Olá {username}!", size=24, weight="bold", color='white'),
                 # Adicione outros controles para a página inicial aqui
-                ft.ElevatedButton(text="Tirar foto", on_click=lambda e: go_to_camera_page(None)),
-                ft.ElevatedButton(text="Logout", on_click=lambda e: switch_to_login(None))
+                ft.ElevatedButton(text="Tirar foto", on_click=go_to_camera_page),
+                ft.ElevatedButton(text="Logout", on_click=switch_to_login)
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER
@@ -73,7 +73,7 @@ def main(page: ft.Page):
         page.controls.clear()
         page.add(create_base_container(camera_page()))
         page.update()
-    
+
     def camera_page():
         myimage = ft.Image(
             src=False,
@@ -82,7 +82,7 @@ def main(page: ft.Page):
             fit='cover'
         )
 
-        def removeallyouphoto():
+        def remove_all_photos():
             folder_path = "images/"
             files = os.listdir(folder_path)
             for file in files:
@@ -92,40 +92,29 @@ def main(page: ft.Page):
                     print(f"File successfully removed: {file_path}")
             page.update()
 
-        def takemepicture(e):
-            removeallyouphoto()
+        def take_picture(e):
+            remove_all_photos()
             cap = cv2.VideoCapture(0)
             cv2.namedWindow("Webcam", cv2.WINDOW_NORMAL)
             cv2.resizeWindow("Webcam", 400, 600)
             timestamp = str(int(time.time()))
             myfileface = f"myPhoto_{timestamp}.jpg"
             try:
-                while True:
-                    ret, frame = cap.read()
-                    cv2.imshow("Webcam", frame)
+                ret, frame = cap.read()
+                if ret:
+                    cv2.imwrite(f"images/{myfileface}", frame)
+                    cv2.putText(frame, "Capture successful!", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                    myimage.src = "images/" + myfileface
                     page.update()
-                    key = cv2.waitKey(1)
-                    if key == ord("q"):
-                        break
-                    elif key == ord("s"):
-                        cv2.imwrite(f"images/{myfileface}", frame)
-                        cv2.putText(frame, "Capture successful!", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                        cv2.imshow("Webcam", frame)
-                        cv2.waitKey(3000)
-                        folder_path = "images/"
-                        myimage.src = folder_path + myfileface
-                        page.update()
-                        break
                 cap.release()
                 cv2.destroyAllWindows()
-                page.update()
             except Exception as e:
                 print(e)
                 print("Error during capture")
 
         return ft.Column([
             ft.Text("Webcam Capture Your Face", size=30, weight="bold"),
-            ft.ElevatedButton("Take My Face", bgcolor="blue", color="white", on_click=takemepicture),
+            ft.ElevatedButton("Take My Face", bgcolor="blue", color="white", on_click=take_picture),
             myimage,
             ft.ElevatedButton(text="Voltar para Home", on_click=lambda e: page.controls.clear() or page.add(create_base_container(home_page(""))))
         ])
