@@ -3,6 +3,7 @@ from flet import *
 import os
 import cv2
 import time
+import pandas as pd
 
 def create_base_container(content):
     return ft.Container(
@@ -26,7 +27,6 @@ def main(page: ft.Page):
     def login_click(e):
         username = username_login.value
         password = password_login.value
-        # Aqui você pode adicionar a lógica para verificar o login
         if username == "" and password == "":
             page.controls.clear()
             page.add(create_base_container(home_page(username)))
@@ -57,22 +57,27 @@ def main(page: ft.Page):
         page.add(create_base_container(signup_form))
         page.update()
 
+    def go_to_camera_page(e):
+        page.controls.clear()
+        page.add(create_base_container(camera_page()))
+        page.update()
+
+    def go_to_table_page(e):
+        page.controls.clear()
+        page.add(create_base_container(table_page()))
+        page.update()
+
     def home_page(username):
         return ft.Column(
             controls=[
                 ft.Text(f"Olá {username}!", size=24, weight="bold", color='white'),
-                # Adicione outros controles para a página inicial aqui
                 ft.ElevatedButton(text="Tirar foto", on_click=go_to_camera_page),
+                ft.ElevatedButton(text="Ver Tabela", on_click=go_to_table_page),
                 ft.ElevatedButton(text="Logout", on_click=switch_to_login)
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER
         )
-
-    def go_to_camera_page(e):
-        page.controls.clear()
-        page.add(create_base_container(camera_page()))
-        page.update()
 
     def camera_page():
         myimage = ft.Image(
@@ -116,6 +121,33 @@ def main(page: ft.Page):
             ft.Text("Tire a foto da nota", size=30, weight="bold"),
             ft.ElevatedButton("Tirar foto", bgcolor="blue", color="white", on_click=take_picture),
             myimage,
+            ft.ElevatedButton(text="Voltar para Home", on_click=lambda e: page.controls.clear() or page.add(create_base_container(home_page(""))))
+        ])
+
+    def table_page():
+        df = pd.DataFrame({
+            "test": ['1', "20", "40"],
+            "test1": ['2', "21", "41"],
+            "test2": ['3', "22", "43"],
+        })
+
+        def headers(df: pd.DataFrame) -> list:
+            return [ft.DataColumn(ft.Text(header)) for header in df.columns]
+
+        def rows(df: pd.DataFrame) -> list:
+            rows = []
+            for index, row in df.iterrows():
+                rows.append(ft.DataRow(cells=[ft.DataCell(ft.Text(row[header])) for header in df.columns]))
+            return rows
+
+        datatable = ft.DataTable(
+            columns=headers(df),
+            rows=rows(df)
+        )
+
+        return ft.Column([
+            ft.Text("Tabela de Dados", size=30, weight="bold"),
+            datatable,
             ft.ElevatedButton(text="Voltar para Home", on_click=lambda e: page.controls.clear() or page.add(create_base_container(home_page(""))))
         ])
 
