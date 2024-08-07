@@ -4,7 +4,7 @@ import cv2
 import time
 
 from components.container import create_base_container
-from utils import makeOCR
+from utils import makeOCR, classify
 
 def camera_page(page, home_page, go_to_camera_page, go_to_table_page, switch_to_login):
     myimage = ft.Image(
@@ -40,7 +40,8 @@ def camera_page(page, home_page, go_to_camera_page, go_to_table_page, switch_to_
                 page.update()
             cap.release()
             cv2.destroyAllWindows()
-            makeOCR(myimage.src)
+            text_from_ocr = makeOCR(myimage.src)
+            classify(text_from_ocr)
         except Exception as e:
             print(e)
             print("Error during capture")
